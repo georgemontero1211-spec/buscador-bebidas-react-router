@@ -1,20 +1,52 @@
-import { useEffect, useMemo } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+} from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useAppStore } from "../stores/useAppStore";
+import type { SearchFilter } from "../types";
+import { hasEmptyValues } from "../utils/index";
 
 export default function Header() {
   const { pathname } = useLocation();
 
   const isHome = useMemo(() => pathname === "/", [pathname]);
+  const [searchFilters, setSearchFilters] = useState<SearchFilter>({
+    ingredient: "",
+    category: "",
+  });
 
   const fetchCategories = useAppStore((state) => state.fetchCategories);
+  const searchRecipes = useAppStore((state) => state.searchRecipes);
   const categories = useAppStore((state) => state.categories);
 
   useEffect(() => {
     fetchCategories();
   }, [fetchCategories]);
 
-  console.log(categories);
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    setSearchFilters({
+      ...searchFilters,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    //Validacion
+    if (hasEmptyValues(searchFilters)) {
+      console.log("Todos los campos son obligatorios");
+      return;
+    }
+    // consultar las resetas
+    searchRecipes(searchFilters);
+  };
 
   return (
     <header
@@ -53,7 +85,10 @@ export default function Header() {
           </nav>
         </div>
         {isHome && (
-          <form className="md:w-1/2 2xl:w-1/3 bg-primary my-32 p-10 rounded-lg shadow space-y-6">
+          <form
+            className="md:w-1/2 2xl:w-1/3 bg-primary my-32 p-10 rounded-lg shadow space-y-6"
+            onSubmit={handleSubmit}
+          >
             <div className="space-y-4">
               <label
                 htmlFor="ingredient"
@@ -67,21 +102,33 @@ export default function Header() {
                 name="ingredient"
                 className="p-3 w-full rounded-lg focus:outline-none bg-white"
                 placeholder="Ejemplo: Tequila, Vodka, etc"
+                onChange={handleChange}
+                value={searchFilters.ingredient}
               />
             </div>
             <div className="space-y-4">
               <label
-                htmlFor="ingredient"
+                htmlFor="category"
                 className="block text-white uppercase font-extrabold text-lg"
               >
                 Categoria
               </label>
               <select
-                id="ingredient"
-                name="ingredient"
+                id="category"
+                name="category"
                 className="p-3 w-full rounded-lg focus:outline-none bg-white"
+                onChange={handleChange}
+                value={searchFilters.category}
               >
                 <option value="">-- Selecciona --</option>
+                {categories.drinks.map((category) => (
+                  <option
+                    key={category.strCategory}
+                    value={category.strCategory}
+                  >
+                    {category.strCategory}
+                  </option>
+                ))}
               </select>
             </div>
             <input

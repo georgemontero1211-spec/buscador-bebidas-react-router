@@ -7,3 +7,18 @@ export const CategoriesAPIResponseSchema = z.object({
     })
   ),
 });
+
+export const SearchFiltersSchema = z.object({
+  ingredient: z.string(),
+  category: z.string(),
+});
+
+export const DrinkAPIResponse = z.object({
+  strDrink: z.string(),
+  strDrinkThumb: z.string(),
+  idDrink: z.string(),
+});
+
+export const DrinksAPIResponseSchema = z.object({
+  drinks: z.array(DrinkAPIResponse),
+});
