@@ -8,7 +8,7 @@ import {
 import { NavLink, useLocation } from "react-router-dom";
 import { useAppStore } from "../stores/useAppStore";
 import type { SearchFilter } from "../types";
-import { hasEmptyValues } from "../utils/index";
+import { hasEmptyValues } from "../utils/validation/hasEmptyValues";
 
 export default function Header() {
   const { pathname } = useLocation();
@@ -22,6 +22,7 @@ export default function Header() {
   const fetchCategories = useAppStore((state) => state.fetchCategories);
   const searchRecipes = useAppStore((state) => state.searchRecipes);
   const categories = useAppStore((state) => state.categories);
+  const showNotification = useAppStore((state) => state.showNotification);
 
   useEffect(() => {
     fetchCategories();
@@ -41,7 +42,10 @@ export default function Header() {
 
     //Validacion
     if (hasEmptyValues(searchFilters)) {
-      console.log("Todos los campos son obligatorios");
+      showNotification({
+        error: true,
+        text: "Todos los campos son obligatorios",
+      });
       return;
     }
     // consultar las resetas
